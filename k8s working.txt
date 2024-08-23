@@ -1,0 +1,55 @@
+Kubernetes, often abbreviated as K8s, is an open-source system designed to automate the deployment, scaling, and management of containerized applications. It acts as a powerful orchestration platform that simplifies the complexities of running containers at scale.   
+
+High-Level Overview:
+
+Containers: Kubernetes operates on the foundation of containers, which are lightweight, portable units of software that package an application along with its dependencies.
+
+   
+Pods: Pods are the smallest deployable units in Kubernetes. They typically encapsulate a single container, but can also house multiple closely related containers that need to share resources.   
+Nodes: Nodes are the worker machines (physical or virtual) that host the pods.   
+
+Control Plane: The control plane is the brain of the Kubernetes cluster, responsible for managing and coordinating the entire system. It includes components like:
+API Server: The central point of communication for all interactions with the cluster.   
+Scheduler: Decides which node to place each pod on based on resource availability and other constraints.   
+Controller Manager: Ensures the desired state of the cluster matches the actual state by continuously monitoring and reconciling any discrepancies.
+etcd: A distributed key-value store that holds the cluster's configuration data.
+
+
+Kubelet: serving as the primary "node agent" that runs on each node within a cluster.
+
+ It acts as the bridge between the Kubernetes control plane and the individual nodes, responsible for managing the lifecycle of containers on those nodes.   
+ 
+ 
+ 
+ 
+ Images are not technically "created" within Docker or Kubernetes themselves. They are **built** using tools and processes outside of these platforms, then **stored** in container registries, and finally **pulled** and **used** by Docker or Kubernetes to run containers. 
+
+Let's break down the image lifecycle in relation to Docker and Kubernetes:
+
+**1. Image Building**
+
+* **Docker:** Docker images are built using `Dockerfiles`, which are text files containing instructions on how to assemble the image layers. The `docker build` command processes the Dockerfile and creates the image.
+* **Kubernetes:** While Kubernetes doesn't have a built-in image building mechanism, it often works in conjunction with tools like:
+    * **Docker:** Images built with Docker can be directly used in Kubernetes.
+    * **Kaniko, Buildah, etc.:** These tools allow building container images without requiring a full Docker daemon, which can be beneficial in Kubernetes environments.
+    * **CI/CD pipelines:**  Images are often built as part of automated Continuous Integration/Continuous Deployment (CI/CD) pipelines, triggered by code changes.
+
+**2. Image Storage**
+
+* **Container Registries:** Built images are stored in container registries (e.g., Docker Hub, Google Container Registry, private registries). These registries act as repositories for images, allowing them to be shared and accessed easily.
+
+**3. Image Usage in Docker/Kubernetes**
+
+* **Docker:** The `docker run` command pulls an image from a registry (if it's not already present locally) and creates a container based on that image.
+* **Kubernetes:** Kubernetes pods reference images in their configuration files. When a pod is scheduled to run on a node, the Kubelet on that node pulls the required image from the registry and creates the containers.
+
+**Key Points:**
+
+* **Image creation is external:** The actual building of images happens outside of Docker and Kubernetes, using tools like Docker or others.
+* **Registries are crucial:** Container registries are central to storing and distributing images.
+* **Docker and Kubernetes consume images:** Both platforms pull images from registries to create and run containers.
+
+Let me know if you'd like a deeper dive into any specific part of this process! 
+
+
+

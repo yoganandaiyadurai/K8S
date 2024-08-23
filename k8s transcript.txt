@@ -1,0 +1,228 @@
+# tactiq.io free youtube transcript
+# Kubernetes Explained
+# https://www.youtube.com/watch/aSrqRSk43lY
+
+00:00:00.940 Hi everyone, my name is Yogi,
+00:00:02.580 and I'm a Director of Technology with Pioneer Multisever.
+00:00:06.840 In this short presentation I'm going to be talking about all things Kubernetes.
+00:00:09.800 Kubernetes as an orchestration tool
+00:00:12.140 allowing you to run and manage your container-based workloads.
+00:00:16.219 Today, I want to take a high-level look
+00:00:18.500 at a reference architecture of managed Kubernetes services
+00:00:22.720 and dive a little bit deeper about how you would do a deployment
+00:00:25.820 of your microservices.
+00:00:27.500 Let's get started here.
+00:00:29.040 So, we've got here, sketched out, two sides of the puzzle.
+00:00:32.659 On the left side here, we've got the cloud side,
+00:00:35.420 and what we've got here is a very important component
+00:00:38.520 that's going to be the Kubernetes master.
+00:00:43.120 The Kubernetes master has a lot of important components in it,
+00:00:46.360 but the most important piece that we want to talk about today
+00:00:49.740 is going to be the API server.
+00:00:52.820 The Kubernetes API server running on the master is integral
+00:00:56.040 to running all of your workloads
+00:00:57.540 and exposes a set of capabilities,
+00:01:00.240 allowing us to define exactly how we want to run our workloads.
+00:01:04.379 On the right side here, on the customer-managed side,
+00:01:07.680 we've got our worker nodes,
+00:01:09.100 which are all also Kubernetes-based.
+00:01:14.620 There's one major component that I want to point out running on every single
+00:01:18.860 Kubernetes worker node, and that's going to be the kubelet.
+00:01:22.240 The kubelet, essentially, is responsible for scheduling
+00:01:26.240 and making sure apps are healthy and running within our worker nodes.
+00:01:29.780 You can imagine that  the master and the kubelet
+00:01:31.540 are going to be working together quite often.
+00:01:34.100 Let's take a step back.
+00:01:35.480 Why would someone want to start using Kubernetes?
+00:01:37.640 Well, maybe they have some microservices
+00:01:39.860 that make up a cloud-native application.
+00:01:41.900 As we all know, microservices are talking to each other over the network.
+00:01:46.200 To really simplify this example,
+00:01:47.820 let's say we've got a frontend and a backend,
+00:01:50.180 and those are the two components that we want to scale out
+00:01:52.420 and deploy to the cluster today.
+00:01:54.700 So, Kubernetes uses YAML
+00:01:57.260 to define the resources that are sent to the API server,
+00:02:01.180 which end up creating the actual application.
+00:02:03.420 So, let's get started with that
+00:02:05.120 by sketching  out a simple YAML for deploying a pod.
+00:02:09.780 A pod is a really small logical unit
+00:02:11.660 which allows you to run a simple container in a worker node.
+00:02:15.000 So, we'll start with that.
+00:02:16.200 Let's say we've got a pod,
+00:02:20.760 and what we need is an image that's associated with it.
+00:02:25.700 Let's say that it's a container,
+00:02:27.100 we've already pushed up to Docker Hub,
+00:02:29.120 and we'll use my registry for this one.
+00:02:34.080 And, let's say the name of the application is just "f" for frontend
+00:02:38.680 version 1.
+00:02:40.740 And one more thing that we want to add here,
+00:02:43.620 let's just say we've got labels.
+00:02:45.820 Labels are very important,
+00:02:49.120 and we'll talk about why in a second here,
+00:02:50.940 but they allow us to define exactly what the type of artifact we've got here is.
+00:02:54.860 So, for the labels, we'll just say the application is "f" for "frontend".
+00:03:03.260 Alright, so we've got that created,
+00:03:06.000 and what we want to do is push it through our process
+00:03:09.249 to get into a worker node.
+00:03:10.580 What we've got here is kubectl.
+00:03:17.100 Using that, we're gonna be able to deploy
+00:03:20.040 the simple manifest that we've got
+00:03:21.840 and have it in one of our worker nodes.
+00:03:24.669 So, we'll push the manifest through kubectl,
+00:03:28.460 it hits the API running on the Kubernetes master,
+00:03:31.040 and that, in turn, is going to go and talk to one of the kubelets
+00:03:37.340 because we just want to deploy one of these pods and start it up.
+00:03:41.480 So, taking a look,
+00:03:42.620 let's say that it starts it up in our first worker node here
+00:03:47.500 with the label that we've given it: "application is frontend".
+00:03:51.120 And one thing to note here:
+00:03:53.380 it actually does get an IP address as well.
+00:03:56.420 Let's say we get an internal IP address that ends in a ".1".
+00:04:00.400 So, at this point, I could SSH into to any of the worker nodes
+00:04:03.800 and use that IP address to hit that application.
+00:04:06.860 So, that's great for deploying a simple application;
+00:04:09.859 let's take it a step further.
+00:04:11.260 Kubernetes has an abstraction called deployments,
+00:04:14.160 allowing us to do something
+00:04:16.459 and create something called a "desired state".
+00:04:18.740 So, we can define the number
+00:04:20.329 of replicas we want for that pod,
+00:04:22.260 and if something were to happen to the pod and it dies,
+00:04:24.420 it would create a new one for us.
+00:04:26.440 So, we've got the pod labeled as "application is frontend",
+00:04:29.740 and we want to say that
+00:04:31.160 we want to create, maybe, three replicas of that.
+00:04:33.660 So, going back to our manifest here.
+00:04:36.820 One thing we need to do is tell Kubernetes
+00:04:38.800 that we don't want a pod,
+00:04:39.980 we want template for a pod.
+00:04:42.000 So, we'll scratch that out,
+00:04:44.460 and we'll create a template for a pod.
+00:04:50.460 On top of that, we've got a few other things that we want.
+00:04:54.160 So, the number of replicas -
+00:04:57.420 let's say we want three.
+00:04:59.900 We've got a selector.
+00:05:02.240 So, we want to tell this deployment
+00:05:04.820 to manage any application deployed with that kind of name here.
+00:05:09.200 We'll say match that selector here.
+00:05:14.270 Again, this is not entirely valid YAML -
+00:05:16.400 I just want give you an idea of the kind of artifacts
+00:05:18.420 that Kubernetes is looking for.
+00:05:20.040 The last thing that we've got here is,
+00:05:21.900 "What kind of artifact is this?"
+00:05:23.920 And this is going to be a deployment.
+00:05:29.620 Alright, so we've scratched out that pod
+00:05:31.500 and we've got a new manifest here.
+00:05:33.240 What it's going to do:
+00:05:34.020 we're going to push it through kubectl,
+00:05:35.680 it hits the API server.
+00:05:37.380 Now it's not an ephemeral kind of object -
+00:05:40.340 Kubernetes needs to manage the desired state -
+00:05:42.920 so what is going to do is,
+00:05:44.160 it's going to manage that deployment
+00:05:45.680 for as long as we have that deployment
+00:05:47.240 and we don't delete it.
+00:05:49.040 It's going to manage that here.
+00:05:50.580 So, we'll say that it creates a deployment,
+00:05:55.320 and since we've got three replicas,
+00:05:57.306 it's always going to ensure that we've got three running.
+00:05:59.860 As soon as we've got the deployment created, we realize,
+00:06:01.860 "Hey, something's wrong, we've only got one, we need two more".
+00:06:04.560 So, what it's going to do
+00:06:06.060 is it's going to schedule out deploying that application
+00:06:10.920 wherever it has resources.
+00:06:13.060 We've got a lot of resources still -
+00:06:14.340 most of these worker nodes are empty,
+00:06:15.780 so it decides to put one in each of the different nodes.
+00:06:19.500 So, we've got the deployment created,
+00:06:21.660 and let's just say we do the same thing for our backend here.
+00:06:25.020 So, we'll create another application deployment:
+00:06:28.560 "application is backend".
+00:06:33.900 And for this one, let's just scale it out two times.
+00:06:36.880 So, we'll go here: "application is backend".
+00:06:44.600 And everyone's happy.
+00:06:46.420 Now we need to start thinking about communication between these services.
+00:06:49.880 We talked about how every pod has an IP address,
+00:06:52.440 but we also mentioned that some of these pods might die.
+00:06:55.620 Maybe you'll have to update them at some point.
+00:06:58.000 When a pod goes away and comes back
+00:06:59.860 it actually has a different IP address.
+00:07:01.680 So, if we want to access one of those pods from the backend
+00:07:04.820 or even external users,
+00:07:06.400 we need an IP address that we can rely on.
+00:07:09.500 And this is a problem that's been around for a while,
+00:07:11.480 and service registry and service discovery capabilities
+00:07:14.000 were created to solve exactly that.
+00:07:16.200 That comes built-in with Kubernetes.
+00:07:19.080 So, what we're gonna do now is create a service
+00:07:21.680 to actually create a more stable IP address
+00:07:24.580 so we can access our pods as a singular application,
+00:07:28.200 rather than individual different services.
+00:07:31.240 So, to do that, we're gonna take a step back here,
+00:07:33.620 and we're going to create a service definition
+00:07:38.240 around those three pods.
+00:07:40.300 To do that, we're going to need some more manifest YAML.
+00:07:43.600 So, we'll go back here
+00:07:47.400 and create a new section in our file.
+00:07:49.660 This time we've got a kind: "service".
+00:07:53.200 And we're going to need a selector on that.
+00:07:56.660 Again, that's going to match the label that we've got here.
+00:08:03.600 And, the last thing that we need here is a type.
+00:08:07.240 So, how do we want to actually expose this?
+00:08:09.760 But we'll get to that in a second.
+00:08:11.140 By default, that type is going to be cluster IP,
+00:08:13.760 meaning our service can be accessed from inside the cluster.
+00:08:17.669 So, deploying that through kubectl,
+00:08:21.200 it hits our master, goes over here,
+00:08:23.485 and creates that abstraction we talked about.
+00:08:26.320 We can say that we created another one
+00:08:28.900 for the backend as well.
+00:08:30.900 So, what we get now is a cluster IP.
+00:08:34.100 Let's just say "CL IP" for short -
+00:08:37.080 and that's going to be an internal IP.
+00:08:40.360 Say, it ends in a 5.
+00:08:43.140 And then another cluster IP for our other service here.
+00:08:50.240 And, we'll say that ends in ".6".
+00:08:55.980 So, now we have an IP that we can use
+00:08:58.900 to reliably do communication between these services.
+00:09:02.400 In addition, the KubeDNS service,
+00:09:05.180 which is usually running by default,
+00:09:06.620 will make it even easier for these services to access each other.
+00:09:09.400 They can just use their names.
+00:09:11.440 So, they could hit each other using the name "frontend,"
+00:09:13.660 "backend," - or "F", or "B" for short.
+00:09:16.680 So, we've got that
+00:09:18.220 and we talked about how now the services can talk to each other,
+00:09:21.080 by using these cluster IPs.
+00:09:24.960 So, communication within the clusters is solved.
+00:09:27.340 How about when we want to start exposing our frontend to our end users?
+00:09:31.340 To do that, what we'll need to do is define a type of this service,
+00:09:35.160 and what we want is a load balancer.
+00:09:40.940 There are actually other ways to expose, like node ports as well,
+00:09:43.720 but a load balancer, essentially what it's going to do,
+00:09:46.100 where this is internal to the actual Kubernetes worker nodes,
+00:09:50.820 we can create an external IP now.
+00:09:58.780 And this might be, let's say, a 169 address.
+00:10:03.840 And now, what we can do is expose that directly to end users
+00:10:09.200 so that they can access that frontend
+00:10:11.500 by directly using that service.
+00:10:13.720 We've talked about 3 major components here today.
+00:10:16.260 We've got pods.
+00:10:17.840 Pods, which are then deployed and managed by deployments.
+00:10:21.340 And then, facilitating access to those pods
+00:10:24.720 created by those deployments using services.
+00:10:27.120 Those are the 3 major components
+00:10:29.140 working together with the Kubernetes master and all the worker nodes
+00:10:32.380 to allow you to really redefine your DevOps workflow
+00:10:36.480 for deploying your applications
+00:10:38.300 into a managed Kubernetes service.
+00:10:40.960 I know we talked about a lot today
+00:10:42.440 but we want to get into more in-depth topics
+00:10:45.160 in our future light boarding videos.
+00:10:46.620 For example, something like deployments.
+00:10:48.340 So, feel free to drop a comment below,
+00:10:50.400 leave us any feedback,
+00:10:51.800 definitely subscribe,
+00:10:52.920 and stay tuned for more light boarding videos in the future
+00:10:55.240 and thank you so much for joining me today.
